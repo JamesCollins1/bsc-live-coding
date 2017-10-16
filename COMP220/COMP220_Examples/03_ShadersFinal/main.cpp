@@ -150,14 +150,51 @@ int main(int argc, char* args[])
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 
-	// An array of 3 vectors which represents 3 vertices
+	// An array of 6 vectors which represents 36 vertices
 	static const GLfloat g_vertex_buffer_data[] = {
-		0.5f, 0.5f, 0.0f,
-		-0.5f, 0.5f, 0.0f,
-		0.5f,  -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		-0.5f, 0.5f, 0.0f
+		//Front Face
+		0.5f, 0.5f, 0.5f,
+		-0.5f, 0.5f, 0.5f,
+		0.5f,  -0.5f, 0.5f,
+		0.5f, -0.5f, 0.5f,
+		-0.5f, -0.5f, 0.5f,
+		-0.5f, 0.5f, 0.5f,
+		//Back Face
+		0.5f, 0.5f, -0.5f,
+		-0.5f, 0.5f, -0.5f,
+		0.5f,  -0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, 0.5f, -0.5f,
+		//Right Face
+		0.5f, 0.5f, 0.5f,
+		0.5f, -0.5f, 0.5f,
+		0.5f, -0.5f, -0.5f,
+		0.5f, 0.5f, 0.5f,
+		0.5f, 0.5f, -0.5f,
+		0.5f, -0.5f, -0.5f,
+		//Left Face
+		-0.5f, 0.5f, 0.5f,
+		-0.5f, -0.5f, 0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, 0.5f, 0.5f,
+		-0.5f, 0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		//Top Face
+		0.5f, 0.5f, 0.5f,
+		0.5f, 0.5f, -0.5f,
+		-0.5f, 0.5f, -0.5f,
+		0.5f, 0.5f, 0.5f
+		-0.5f, 0.5f, 0.5f,
+		-0.5f, 0.5f, -0.5f,
+		//Bottom Face
+		0.5f, -0.5f, 0.5f,
+		0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		0.5f, -0.5f, 0.5f,
+		-0.5f, -0.5f, 0.5f,
+		-0.5f, -0.5f, -0.5f
+
 
 	
 		
@@ -192,7 +229,16 @@ int main(int argc, char* args[])
 	}
 
 	GLint modelMatrixLocation = glGetUniformLocation(programID, "modelMatrix");
+	GLint viewMatrixLocation = glGetUniformLocation(programID, "viewMatrix");
+	GLint projectionMatrixLocation = glGetUniformLocation(programID, "projectionMatrix");
 
+	vec3 cameraPosition = vec3(0.0f, 0.0f, -10.0f);
+	vec3 cameraTarget = vec3(0.0f, 0.0f, 0.0f);
+	vec3 cameraUp = vec3(0.0f, 1.0f, 0.0f);
+
+	mat4 viewMatrix = lookAt(cameraPosition, cameraTarget, cameraUp);
+
+	mat4 projectionMatrix = perspective(radians(90.0f), float(800 / 800), 0.1f, 100.0f);
 
 
 	int lastTicks = SDL_GetTicks();
@@ -240,6 +286,8 @@ int main(int argc, char* args[])
 		glUniform4fv(fragColourLocation, 1, fragColour);
 		glUniform1f(currentTimeLocation, (float)(currentTicks)/1000.0f);
 		glUniformMatrix4fv(modelMatrixLocation, 1, false, value_ptr(translationMatrix));
+		glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, value_ptr(viewMatrix));
+		glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, value_ptr(projectionMatrix));
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -251,8 +299,8 @@ int main(int argc, char* args[])
 			0,                  // stride
 			(void*)0            // array buffer offset
 		);
-		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, 6); // Starting from vertex 0; 3 vertices total -> 1 triangle
+		// Draw the Square!
+		glDrawArrays(GL_TRIANGLES, 0, 36); // Starting from vertex 0; 3 vertices total -> 1 triangle
 		glDisableVertexAttribArray(0);
 
 		SDL_GL_SwapWindow(window);

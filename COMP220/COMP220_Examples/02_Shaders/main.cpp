@@ -97,6 +97,8 @@ GLuint LoadShaders(const char * vertex_file_path, const char * fragment_file_pat
 	return ProgramID;
 }
 
+
+
 int main(int argc, char* args[])
 {
 	//Initialises the SDL Library, passing in SDL_INIT_VIDEO to only initialise the video subsystems
@@ -123,28 +125,31 @@ int main(int argc, char* args[])
 		return 1;
 	}
 
-	//lets ask for a 3.2 core profile version of OpenGL
+
+
+	//Requests 3.2 CORE OPENGL
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-	SDL_GLContext GL_Context = SDL_GL_CreateContext(window);
-	if (GL_Context == nullptr)
+	SDL_GLContext gl_Context = SDL_GL_CreateContext(window);
+	if (gl_Context == nullptr)
 	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, SDL_GetError(), "SDL GL Create Context failed", NULL);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "CREATE CONTEXT FAILED", SDL_GetError(), NULL);
 		SDL_DestroyWindow(window);
 		SDL_Quit();
+
 		return 1;
 	}
-	//Initialize GLEW
-	glewExperimental = GL_TRUE;
-	GLenum glewError = glewInit();
-	if (glewError != GLEW_OK)
-	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, (char*)glewGetErrorString(glewError), "GLEW Init Failed", NULL);
-	}
 
+	//Initialise GLEW
+	glewExperimental = GL_TRUE;
+	GLenum err = glewInit();
+	if (err != GLEW_OK)
+	{
+		//Show error
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, (char*)glewGetErrorString(err), "GLEW INIT FAILED", NULL);
+	}
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -166,7 +171,13 @@ int main(int argc, char* args[])
 	// Give our vertices to OpenGL.
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-	GLuint programID = LoadShaders("vert.glsl", "frag.glsl");
+
+	GLint programID = LoadShaders("vert.glsl", "frag.glsl");
+	if (programID < 0)
+	{
+
+	}
+
 
 	//Event loop, we will loop until running is set to false, usually if escape has been pressed or window is closed
 	bool running = true;
@@ -198,8 +209,9 @@ int main(int argc, char* args[])
 			}
 		}
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		//Do Rendering here!
+		glClearColor(.0, 0.0, 0.0, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(programID);
 
@@ -218,14 +230,24 @@ int main(int argc, char* args[])
 		glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
 		glDisableVertexAttribArray(0);
 
+
+
+
 		SDL_GL_SwapWindow(window);
 	}
 
-	glDeleteVertexArrays(1, &VertexArrayID);
-	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteProgram(programID);
 
-	SDL_GL_DeleteContext(GL_Context);
+	//Deletes Buffers
+	glDeleteBuffers(1, &vertexbuffer);
+
+	//Deletes Traingles
+	glDeleteVertexArrays(1, &VertexArrayID);
+
+	//Deletes Context
+	SDL_GL_DeleteContext(gl_Context);
+
+
 	//Destroy the window and quit SDL2, NB we should do this after all cleanup in this order!!!
 	//https://wiki.libsdl.org/SDL_DestroyWindow
 	SDL_DestroyWindow(window);

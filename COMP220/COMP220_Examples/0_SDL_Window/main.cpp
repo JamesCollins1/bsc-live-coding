@@ -10,76 +10,23 @@ int main(int argc, char* args[])
 	{
 		//Display an error message box
 		//https://wiki.libsdl.org/SDL_ShowSimpleMessageBox
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SDL_Init failed", SDL_GetError(), NULL);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, SDL_GetError(), "SDL_Init failed", NULL);
 		return 1;
 	}
 
 	//Create a window, note we have to free the pointer returned using the DestroyWindow Function
 	//https://wiki.libsdl.org/SDL_CreateWindow
-	SDL_Window* window = SDL_CreateWindow("SDL2 Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+	SDL_Window* window = SDL_CreateWindow("SDL2 Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN );
 	//Checks to see if the window has been created, the pointer will have a value of some kind
 	if (window == nullptr)
 	{
 		//Show error
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SDL_CreateWindow failed", SDL_GetError(), NULL);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, SDL_GetError(), "SDL_CreateWindow failed", NULL);
 		//Close the SDL Library
 		//https://wiki.libsdl.org/SDL_Quit
 		SDL_Quit();
 		return 1;
 	}
-
-
-	//Set OpenGLAttributes
-
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-
-	SDL_GLContext gl_Context = SDL_GL_CreateContext(window);
-	if (gl_Context == nullptr)
-	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SDL_Create Context failed", SDL_GetError(), NULL);
-
-		SDL_DestroyWindow(window);
-		SDL_Quit();
-
-		return 1;
-	}
-
-	//Init GLEW
-	glewExperimental = GL_TRUE;
-	GLenum Err = glewInit();
-	if (Err != GLEW_OK)
-	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "GLEW got stuck on Init", (char*)glewGetErrorString(Err), NULL);
-
-		SDL_DestroyWindow(window);
-		SDL_Quit();
-
-		return 1;
-	}
-
-	// Create Vertex Array
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-
-	// Setting Triangle Coordinates
-	static const GLfloat g_vertex_buffer_data[] = {
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-	};
-
-	GLuint vertexbuffer;
-
-	glGenBuffers(1, &vertexbuffer);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
 	//Event loop, we will loop until running is set to false, usually if escape has been pressed or window is closed
 	bool running = true;
@@ -111,32 +58,21 @@ int main(int argc, char* args[])
 			}
 		}
 
-		//Update game and draw with OpenGL
-		glClearColor(0.2, 0.5, 0.9, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
+		//Grab the window surface, please note we DON'T need to free the memory on this, it will be automatically collected
+		//when the window is destroyed
+		//https://wiki.libsdl.org/SDL_GetWindowSurface
+		SDL_Surface* screenSurface= SDL_GetWindowSurface(window);
+		//Fill the surface with black
+		//https://wiki.libsdl.org/SDL_FillRect
+		//https://wiki.libsdl.org/SDL_MapRGB
+		SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0, 0, 0));
 
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glVertexAttribPointer(
-			0,
-			3,
-			GL_FLOAT,
-			GL_FALSE,
-			0,
-			(void*)0
-		);
-
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDisableVertexAttribArray(0);
-
-		SDL_GL_SwapWindow(window);
+		//Update the surface on the screen
+		//https://wiki.libsdl.org/SDL_UpdateWindowSurface
+		SDL_UpdateWindowSurface(window);
 	}
 
-	glDeleteBuffers(1, &vertexbuffer);
-	//Delete Vertex Array
-	glDeleteVertexArrays(1, &VertexArrayID);
-	//Delete GL Context
-	SDL_GL_DeleteContext(gl_Context);
+
 	//Destroy the window and quit SDL2, NB we should do this after all cleanup in this order!!!
 	//https://wiki.libsdl.org/SDL_DestroyWindow
 	SDL_DestroyWindow(window);

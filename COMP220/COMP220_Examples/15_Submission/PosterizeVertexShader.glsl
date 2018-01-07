@@ -12,8 +12,10 @@ out vec4 vertexColourOut;
 out vec2 vertexTextureCoordOut;
 out vec3 vertexNormalsOut;
 out vec4 diffuse;
-
+out  vec4 PosterizedDiffuse;
 out vec4 specular;
+
+out float Brightness;
 
 uniform vec3 cameraPosition;
 

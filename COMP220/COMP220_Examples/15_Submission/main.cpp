@@ -22,7 +22,7 @@ int main(int argc, char* args[])
 	
 	Volleyball->update();
 
-	Volleyball->loadShaderProgram("CellShadeVertexShader.glsl", "CellShadeFragmentShader.glsl");
+	Volleyball->loadShaderProgram("PosterizeVertexShader.glsl", "PosterizeFragmentShader.glsl");
 
 	gameObjectList.push_back(Volleyball);
 
@@ -89,7 +89,7 @@ int main(int argc, char* args[])
 
 	btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 
-	dynamicsWorld->setGravity(btVector3(0, -10, 0));
+	dynamicsWorld->setGravity(btVector3(0, -100, 0));
 
 	btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(300.), btScalar(2.), btScalar(300.)));
 
